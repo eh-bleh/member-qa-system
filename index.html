@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member QA System - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .config-section {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .config-section label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .example-questions {
+            margin-bottom: 24px;
+        }
+        
+        .example-questions h3 {
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .question-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            background: #edf2f7;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #4a5568;
+            transition: all 0.2s;
+        }
+        
+        .question-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button.submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        button.submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button.submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        button.submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.success {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+        }
+        
+        .result.error {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+        }
+        
+        .result h3 {
+            margin-bottom: 12px;
+            color: #2d3748;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .result p {
+            color: #4a5568;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+        
+        .debug-info {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: monospace;
+            display: none;
+        }
+        
+        .debug-info.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Member QA System</h1>
+        <p class="subtitle">Test the question-answering API with natural language queries</p>
+        
+        <div class="config-section">
+            <label for="apiUrl">API Endpoint</label>
+            <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+        </div>
+        
+        <div class="example-questions">
+            <h3>Example Questions</h3>
+            <button class="question-btn" onclick="setQuestion('When is Layla planning her trip to London?')">Layla's trip</button>
+            <button class="question-btn" onclick="setQuestion('How many cars does Vikram Desai have?')">Vikram's cars</button>
+            <button class="question-btn" onclick="setQuestion('What are Amira\'s favorite restaurants?')">Amira's restaurants</button>
+            <button class="question-btn" onclick="setQuestion('List all members who sent messages')">All members</button>
+            <button class="question-btn" onclick="setQuestion('What activities are mentioned?')">Activities</button>
+        </div>
+        
+        <div class="input-group">
+            <label for="question">Your Question</label>
+            <textarea id="question" placeholder="Ask anything about the member data...">List all members who sent messages</textarea>
+        </div>
+        
+        <button class="submit-btn" onclick="askQuestion()" id="submitBtn">Ask Question</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Thinking...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="debug-info" id="debugInfo"></div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="totalQueries">0</div>
+                <div class="stat-label">Questions Asked</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="avgTime">-</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let totalQueries = 0;
+        let totalTime = 0;
+        
+        function setQuestion(question) {
+            document.getElementById('question').value = question;
+        }
+        
+        async function askQuestion() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const question = document.getElementById('question').value.trim();
+            const resultDiv = document.getElementById('result');
+            const debugDiv = document.getElementById('debugInfo');
+            const loadingDiv = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!question) {
+                showResult('Please enter a question', 'error');
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.classList.add('active');
+            resultDiv.classList.remove('show');
+            debugDiv.classList.remove('show');
+            submitBtn.disabled = true;
+            
+            const startTime = Date.now();
+            
+            try {
+                console.log('Sending request to:', `${apiUrl}/ask`);
+                console.log('Question:', question);
+                
+                const response = await fetch(`${apiUrl}/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (data.answer) {
+                        showResult(data.answer, 'success');
+                        
+                        // Update stats
+                        totalQueries++;
+                        totalTime += responseTime;
+                        updateStats(responseTime);
+                    } else {
+                        showResult('No answer received from the API', 'error');
+                        showDebug(`Response: ${JSON.stringify(data)}`);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    
+                    let errorMessage = `Error ${response.status}: `;
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMessage += errorData.detail || errorText;
+                    } catch {
+                        errorMessage += errorText;
+                    }
+                    
+                    showResult(errorMessage, 'error');
+                    showDebug(`Full error: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                showResult(
+                    `Network error: ${error.message}\n\nMake sure:\n1. The API is running at ${apiUrl}\n2. Run: python main.py\n3. Check the console for details`,
+                    'error'
+                );
+                showDebug(`Error details: ${error.stack || error.message}`);
+            } finally {
+                loadingDiv.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            const icon = type === 'success' ? '✅' : '❌';
+            const title = type === 'success' ? 'Answer' : 'Error';
+            
+            resultDiv.className = `result ${type} show`;
+            resultDiv.innerHTML = `
+                <h3>${icon} ${title}</h3>
+                <p>${escapeHtml(message)}</p>
+            `;
+        }
+        
+        function showDebug(message) {
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.className = 'debug-info show';
+            debugDiv.textContent = message;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function updateStats(responseTime) {
+            document.getElementById('totalQueries').textContent = totalQueries;
+            const avgTime = (totalTime / totalQueries / 1000).toFixed(2);
+            document.getElementById('avgTime').textContent = `${avgTime}s`;
+        }
+        
+        // Allow Enter to submit (with Shift+Enter for new line)
+        document.getElementById('question').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askQuestion();
+            }
+        });
+        
+        // Test connection on load
+        window.addEventListener('load', async () => {
+            const apiUrl = document.getElementById('apiUrl').value;
+            try {
+                const response = await fetch(`${apiUrl}/health`);
+                if (response.ok) {
+                    console.log('✅ API is reachable');
+                } else {
+                    console.warn('⚠️ API returned status:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Cannot reach API. Make sure it\'s running with: python main.py');
+            }
+        });
+    </script>
+</body>
+</html>
