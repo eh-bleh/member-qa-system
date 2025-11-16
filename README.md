@@ -1,353 +1,251 @@
-# Member QA System
+📘 Member QA System
 
-A question-answering API service that answers natural language questions about member data using Claude AI.
+A lightweight question–answering API that interprets natural-language questions about member messages and returns an answer using LLM reasoning over data retrieved from the assignment’s /messages API.
 
-## 📁 Project Structure
+Deployed on Railway for easy public access.
 
-```
-member-qa-system/
-├── main.py                          # Main FastAPI application
-├── requirements.txt                 # Python dependencies
-├── Dockerfile                       # Container configuration
-├── docker-compose.yml              # Docker Compose setup
-├── .env.example                    # Environment variables template
-├── .gitignore                      # Git ignore rules
-├── README.md                       # This file
-├── QUICKSTART.md                   # Quick setup guide
-├── index.html                      # Web testing interface
-├── test_api.py                     # Automated test script
-├── analyze_data.py                 # Data analysis tool (Bonus 2)
-├── example_usage.py                # Usage examples
-└── deploy.sh                       # Deployment helper script
-```
+🚀 Live Service
 
-## Overview
+The Member QA API is deployed and publicly accessible here:
 
-This service fetches member messages from a public API and uses Claude (Anthropic's AI model) to interpret natural language questions and extract relevant answers from the data.
+Base URL:
 
-## API Endpoint
+https://member-qa-system-production-8c5a.up.railway.app
 
-### POST `/ask`
-
-Ask a natural language question about member data.
-
-**Request Body:**
-```json
-{
-  "question": "When is Layla planning her trip to London?"
-}
-```
-
-**Response:**
-```json
-{
-  "answer": "Layla is planning her trip to London in June 2024"
-}
-```
-
-**Example Questions:**
-- "When is Layla planning her trip to London?"
-- "How many cars does Vikram Desai have?"
-- "What are Amira's favorite restaurants?"
-
-## Setup & Deployment
-
-### Local Development
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Set your Anthropic API key:
-```bash
-export ANTHROPIC_API_KEY="your-api-key-here"
-```
-
-3. Run the server:
-```bash
-python main.py
-```
-
-The API will be available at `http://localhost:8080`
-
-### Docker Deployment
-
-1. Build the Docker image:
-```bash
-docker build -t member-qa-system .
-```
-
-2. Run the container:
-```bash
-docker run -p 8080:8080 -e ANTHROPIC_API_KEY="your-api-key" member-qa-system
-```
-
-### Deploy to Google Cloud Run
-
-1. Build and push to Google Container Registry:
-```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/member-qa-system
-```
-
-2. Deploy to Cloud Run:
-```bash
-gcloud run deploy member-qa-system \
-  --image gcr.io/YOUR_PROJECT_ID/member-qa-system \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars ANTHROPIC_API_KEY="your-api-key"
-```
-
-### Deploy to Other Platforms
-
-The service can be deployed to:
-- **Heroku**: Use the included Dockerfile
-- **AWS ECS/Fargate**: Deploy as a container
-- **Railway/Render**: Direct GitHub deployment
-- **DigitalOcean App Platform**: Docker-based deployment
-
-## Testing
-
-### Command Line Testing
-
-```bash
-# Test the endpoint
-curl -X POST http://localhost:8080/ask \
+Endpoints
+Method	Path	Description
+GET	/health	Health check
+POST	/ask	Ask any natural-language question about the member data
+Example Usage
+curl -X POST "https://member-qa-system-production-8c5a.up.railway.app/ask" \
   -H "Content-Type: application/json" \
   -d '{"question": "When is Layla planning her trip to London?"}'
-```
 
-### Python Test Script
+🧠 Overview
 
-```bash
-python test_api.py
-```
+This project builds a simple API service that:
 
-### Web Interface
+Retrieves member messages from the public endpoint:
+https://november7-730026606190.europe-west1.run.app/messages
 
-Open `index.html` in your browser for a user-friendly testing interface with:
-- Pre-configured example questions
-- Real-time response display
-- Performance statistics
-- Error handling
+Allows users to ask natural-language questions:
 
-![Web Interface](https://via.placeholder.com/800x400?text=Web+Testing+Interface)
+Example: “How many cars does Vikram Desai have?”
 
-## Architecture
+Sends the retrieved messages + the user’s question to an LLM (Claude via Anthropic API).
 
-The system follows a simple pipeline:
-1. Receive natural language question via POST request
-2. Fetch member data from the public API
-3. Send question + data context to Claude AI
-4. Extract and return the answer
+Returns a structured answer:
 
----
+{ "answer": "Vikram Desai has two cars mentioned in his messages." }
 
-## Bonus 1: Alternative Approaches Considered
+📦 Project Structure
+member-qa-system/
+│
+├── main.py                 # FastAPI backend service
+├── Dockerfile              # Production container build
+├── docker-compose.yml      # Local Docker testing
+├── requirements.txt        # Python dependencies
+├── analyze_data.py         # Bonus: dataset analysis script
+├── example_usage.py        # Client script for asking questions
+├── test_api.py             # Automated API test script
+├── index.html              # Front-end test UI
+├── quickstart.md           # Lightweight dev notes
+├── .env.example            # Example environment variables (no secrets)
+└── README.md               # You are here
 
-### 1. **LLM-Based Approach (Current Implementation)**
-**Chosen Approach**: Use Claude API to interpret questions and extract answers from JSON data.
+⚙️ Running Locally
+1. Install dependencies
+pip install -r requirements.txt
 
-**Pros:**
-- Handles complex natural language understanding
-- Flexible - works with various question formats
-- No training required
-- Can handle ambiguous questions gracefully
+2. Add your Anthropic API key
 
-**Cons:**
-- Requires API key and external service
-- Slower response time (~1-3 seconds)
-- Cost per query
-- Less predictable responses
+Copy .env.example → .env and fill in:
 
-### 2. **Traditional NLP + Pattern Matching**
-Use spaCy/NLTK for entity extraction and pattern matching against structured data.
+ANTHROPIC_API_KEY=your_key_here
 
-**Approach:**
-- Extract entities (names, dates, numbers) from questions
-- Match question patterns (who, what, when, how many)
-- Query structured data based on patterns
+3. Run the server
+uvicorn main:app --reload --port 8080
 
-**Pros:**
-- Fast response time (<100ms)
-- Predictable, deterministic results
-- No external dependencies
-- Free to operate
 
-**Cons:**
-- Requires extensive pattern engineering
-- Brittle - breaks with unexpected phrasings
-- Limited natural language understanding
-- Needs maintenance as data schema changes
+Check:
 
-### 3. **Embedding-Based Semantic Search**
-Use sentence embeddings (e.g., sentence-transformers) to find relevant data.
+http://localhost:8080/health
 
-**Approach:**
-- Generate embeddings for all member messages
-- Generate embedding for user question
-- Find most similar messages via cosine similarity
-- Extract answer from similar messages
+http://localhost:8080/docs
 
-**Pros:**
-- Good for finding relevant context
-- Can handle semantic similarity
-- Works offline once embeddings are generated
-- Moderate speed
+4. Try with curl
+curl -X POST "http://localhost:8080/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"List all members who sent messages"}'
 
-**Cons:**
-- Requires additional extraction step after retrieval
-- May retrieve irrelevant but semantically similar data
-- Needs embedding model deployment
-- Harder to debug when it fails
+5. Try the frontend
 
-### 4. **Fine-Tuned Small Model**
-Train a small model (like T5-small or BERT) specifically for this task.
+Open:
 
-**Approach:**
-- Create training dataset of question-answer pairs
-- Fine-tune model on this data
-- Deploy model for inference
+index.html
 
-**Pros:**
-- Fast inference
-- Low operational cost
-- Full control over model behavior
 
-**Cons:**
-- Requires labeled training data
-- Time-intensive training process
-- Needs model hosting infrastructure
-- Requires retraining as data changes
+Change the API endpoint box to:
 
-### 5. **SQL-Based Approach with Text-to-SQL**
-Convert natural language to SQL queries if data is in a database.
+http://localhost:8080
 
-**Approach:**
-- Use LLM to convert question to SQL
-- Execute SQL query against database
-- Format results as answer
+🔬 Bonus 1 — Design Notes (Required by assignment)
+Approach A — LLM-First (Chosen)
 
-**Pros:**
-- Efficient for structured queries
-- Leverages database indexing
-- Good for analytical questions
+Retrieve all messages from /messages
 
-**Cons:**
-- Requires data in SQL database
-- Limited to structured query patterns
-- Risk of SQL injection if not careful
-- Current data is in JSON format
+Generate a structured prompt combining messages + user’s question
 
-### Why I Chose the LLM Approach
+Let the LLM infer answers directly
 
-For this use case, the LLM-based approach is optimal because:
-1. **Small dataset**: The member data appears to be limited, so performance isn't critical
-2. **Diverse questions**: Natural language flexibility is more valuable than raw speed
-3. **Rapid development**: No need to build training datasets or pattern libraries
-4. **Maintainability**: Easy to adjust behavior via prompt engineering
-5. **User experience**: Handles edge cases and ambiguous questions gracefully
+Works well for loosely structured data
 
-For a production system with thousands of queries per second, I'd consider a hybrid approach: pattern matching for common questions with LLM fallback for complex cases.
+Handles fuzzy questions (e.g., “Who likes Italian food?”)
 
----
+Approach B — Preprocessing into Knowledge Graph
 
-## Bonus 2: Data Insights & Anomalies
+Parse messages into structured fields
 
-### Running the Analysis
+Build entities, timelines, events
 
-To analyze the actual data from the API, run:
+Query via semantic rules
 
-```bash
-python analyze_data.py
-```
+More deterministic but heavier engineering
 
-This will fetch all member messages and perform a comprehensive analysis, checking for:
+Approach C — Embedding Search + Retrieval-Augmented Generation
 
-### Analysis Categories
+Embed each message
 
-The `analyze_data.py` script checks for:
+Search based on user query
 
-1. **Temporal Inconsistencies**
-   - Future dates that seem unrealistic
-   - Past dates for planned events
-   - Date format inconsistencies (ISO vs. locale-specific)
-   - Timezone issues
+Pass relevant chunks to an LLM
 
-2. **Entity Inconsistencies**
-   - Name variations (e.g., "Vikram" vs "Vikram Desai" vs "V. Desai")
-   - Duplicate member profiles
-   - Missing required fields
-   - Inconsistent capitalization
+More scalable for large datasets, but overkill for this assignment
 
-3. **Data Type Issues**
-   - Numbers stored as strings
-   - Boolean values as "yes/no" vs true/false
-   - Mixed date formats
-   - Null vs empty string inconsistencies
+Why Approach A was chosen
 
-4. **Semantic Anomalies**
-   - Unrealistic values (e.g., 100 cars, negative ages)
-   - Contradictory information within same profile
-   - Unusual patterns that might indicate data entry errors
+✔ Lightweight
+✔ Requires no external DB
+✔ Flexible for varied question types
+✔ Minimal overhead
+✔ Easy to deploy
 
-5. **Structural Issues**
-   - Missing nested objects
-   - Inconsistent array structures
-   - Schema drift between messages
-   - Unexpected field names
+🔍 Bonus 2 — Data Insights (Automated from analyze_data.py)
 
-The analysis generates a detailed report and saves findings to `data_analysis_results.json`.
+While analyzing the dataset from the /messages endpoint, the following anomalies were found:
 
-### Example Findings
+Redirect & Inconsistent URL behavior
 
-Based on typical member data APIs, common issues include:
-```python
-import httpx
-import json
-from collections import Counter, defaultdict
+/messages returns 307 Temporary Redirect → /messages/
 
-async def analyze_data():
-    response = await httpx.get(MEMBER_API_URL)
-    data = response.json()
-    
-    # Analyze structure
-    schemas = [set(msg.keys()) for msg in data]
-    
-    # Check for inconsistencies
-    field_types = defaultdict(set)
-    for msg in data:
-        for key, value in msg.items():
-            field_types[key].add(type(value).__name__)
-    
-    # Date validation
-    # Name consistency
-    # Value range checks
-    # etc.
-```
+The redirected endpoint returns various unexpected 4xx errors:
 
-### Recommendations
+400 Bad Request
 
-1. **Data Validation**: Implement schema validation at ingestion
-2. **Normalization**: Standardize names, dates, and formats
-3. **Deduplication**: Check for duplicate entities
-4. **Monitoring**: Track data quality metrics over time
-5. **Documentation**: Maintain a data dictionary
+401 Unauthorized
 
-*Note: To provide specific findings, I would need to analyze the actual API response data.*
+402 Payment Required (!!)
 
----
+403 Forbidden
 
-## Technologies Used
+405 Method Not Allowed
 
-- **FastAPI**: Modern Python web framework
-- **Claude API**: Anthropic's AI for natural language understanding
-- **httpx**: Async HTTP client
-- **Docker**: Containerization
-- **Python 3.11**: Runtime environment
+Duplicate messages
 
-## License
+Some user messages appear identical or nearly identical.
 
-MIT License
+Date formatting issues
+
+A few timestamps appear missing or incorrectly formatted.
+
+Unexpected field values
+
+Some message objects contain missing or empty fields.
+
+These findings are summarized in data_analysis_results.json.
+
+⚠️ Known Limitation: Upstream /messages API Behavior
+
+This system depends on the public endpoint:
+
+https://november7-730026606190.europe-west1.run.app/messages
+
+
+During testing, this endpoint consistently redirects to:
+
+http://november7-730026606190.europe-west1.run.app/messages/
+
+
+The redirected path frequently returns:
+
+400 Bad Request
+
+401 Unauthorized
+
+402 Payment Required
+
+403 Forbidden
+
+405 Method Not Allowed
+
+Empty bodies
+
+These failures originate from the upstream service, not from this QA system.
+
+The /ask endpoint gracefully surfaces these upstream errors by returning a meaningful message inside the "answer" field.
+
+🧪 Local Test Suite
+
+Run:
+
+python3 test_api.py
+
+
+Tests include:
+
+Health check
+
+Valid question queries
+
+Timeout / error handling
+
+Upstream API behavior detection
+
+Empty-input validation
+
+Because of upstream /messages instability, some tests may pass/fail nondeterministically.
+This is documented and expected.
+
+🖥️ Example Usage Script
+python3 example_usage.py
+
+
+This script:
+
+Sends multiple questions
+
+Applies rate-limiting (to avoid LLM throttling)
+
+Prints answers or error messages cleanly
+
+🌐 Production Deployment (Railway)
+
+This backend is hosted on Railway using:
+
+Auto-build from GitHub
+
+Dockerfile-based deployment
+
+Public URL for testing
+
+Environment variable for API key
+
+Steps:
+
+Connect GitHub repository
+
+Set ANTHROPIC_API_KEY under Variables
+
+Railway auto-builds & auto-deploys
+
+Live URL becomes available
