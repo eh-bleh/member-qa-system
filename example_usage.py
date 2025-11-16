@@ -8,8 +8,8 @@ import json
 
 import httpx
 
-# Change this to your deployed service URL if needed
-API_URL = "http://localhost:8080"
+# Use deployed Railway URL
+API_URL = "https://member-qa-system-production-8c5a.up.railway.app"
 
 
 async def ask_question(question: str) -> str:
@@ -26,10 +26,7 @@ async def ask_question(question: str) -> str:
             data = response.json()
             return data.get("answer", "<No 'answer' field in response>")
         else:
-            return (
-                f"[ERROR] Status {response.status_code}: "
-                f"{response.text}"
-            )
+            return f"[ERROR] Status {response.status_code}: {response.text}"
     except httpx.RequestError as exc:
         return f"[ERROR] Request failed: {exc}"
 
@@ -58,8 +55,8 @@ async def main() -> None:
         print("-" * 80)
         print()
 
-        # slow down requests so we don't hit rate limits
-        await asyncio.sleep(2)  # Be nice to the API / LLM
+        # Be nice to the LLM / upstream API
+        await asyncio.sleep(2)
 
 
 if __name__ == "__main__":
