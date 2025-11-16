@@ -8,7 +8,8 @@ import json
 import httpx
 
 # Configuration
-API_BASE_URL = "http://localhost:8080"  # Change this to deployed URL
+API_BASE_URL = API_BASE_URL = "https://member-qa-system-production-8c5a.up.railway.app"
+
 
 # Test questions based on the API structure
 TEST_QUESTIONS = [
