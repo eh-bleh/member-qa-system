@@ -282,14 +282,19 @@
         
         <div class="config-section">
             <label for="apiUrl">API Endpoint</label>
-            <input type="text" id="apiUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+            <input
+                type="text"
+                id="apiUrl"
+                value="https://member-qa-system-production-8c5a.up.railway.app"
+                placeholder="https://member-qa-system-production-8c5a.up.railway.app"
+            >
         </div>
         
         <div class="example-questions">
             <h3>Example Questions</h3>
             <button class="question-btn" onclick="setQuestion('When is Layla planning her trip to London?')">Layla's trip</button>
             <button class="question-btn" onclick="setQuestion('How many cars does Vikram Desai have?')">Vikram's cars</button>
-            <button class="question-btn" onclick="setQuestion('What are Amira\'s favorite restaurants?')">Amira's restaurants</button>
+            <button class="question-btn" onclick="setQuestion('What are Amira\\'s favorite restaurants?')">Amira's restaurants</button>
             <button class="question-btn" onclick="setQuestion('List all members who sent messages')">All members</button>
             <button class="question-btn" onclick="setQuestion('What activities are mentioned?')">Activities</button>
         </div>
@@ -401,7 +406,7 @@
             } catch (error) {
                 console.error('Request failed:', error);
                 showResult(
-                    `Network error: ${error.message}\n\nMake sure:\n1. The API is running at ${apiUrl}\n2. Run: python main.py\n3. Check the console for details`,
+                    `Network error: ${error.message}\n\nMake sure:\n1. The API is reachable at ${apiUrl}\n2. If running locally, start it with: python main.py\n3. Check the browser console and server logs for details.`,
                     'error'
                 );
                 showDebug(`Error details: ${error.stack || error.message}`);
@@ -460,7 +465,7 @@
                     console.warn('⚠️ API returned status:', response.status);
                 }
             } catch (error) {
-                console.error('❌ Cannot reach API. Make sure it\'s running with: python main.py');
+                console.error('❌ Cannot reach API. Make sure it is running at the configured URL (local or Railway).');
             }
         });
     </script>
