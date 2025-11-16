@@ -1,25 +1,33 @@
-Member QA System
+# Member QA System
 
 A question-answering API service that answers natural language questions about member data using Claude AI.
 
-🚀 Live Deployment (Railway)
+## 🚀 Live Deployment (Railway)
 
 Your deployed API is publicly accessible here:
 
-Base URL:
+**Base URL:** `https://member-qa-system-production-8c5a.up.railway.app`
 
-https://member-qa-system-production-8c5a.up.railway.app
+### Endpoints
 
-Health Check
+**Health Check**
+```
 GET /health
+```
 
-Ask a Question
+**Ask a Question**
+```
 POST /ask
+```
+```json
 {
   "question": "When is Layla planning her trip to London?"
 }
+```
 
-📁 Project Structure
+## 📁 Project Structure
+
+```
 member-qa-system/
 ├── main.py                          # Main FastAPI application
 ├── requirements.txt                 # Python dependencies
@@ -34,287 +42,228 @@ member-qa-system/
 ├── analyze_data.py                  # Data analysis tool (Bonus 2)
 ├── example_usage.py                 # Usage examples
 └── data_analysis_results.json       # Output of dataset analysis
+```
 
-Overview
+## Overview
 
-This service retrieves member messages from the provided /messages API and uses Claude (Anthropic’s AI model) to interpret natural language questions and extract relevant answers.
+This service retrieves member messages from the provided `/messages` API and uses Claude (Anthropic's AI model) to interpret natural language questions and extract relevant answers.
 
-The system:
+**The system:**
+- Fetches messages from: `https://november7-730026606190.europe-west1.run.app/messages`
+- Sends both the message dataset and the user's question to Claude
+- Returns a structured JSON answer
 
-Fetches messages from:
+## API Endpoints
 
-https://november7-730026606190.europe-west1.run.app/messages
+### POST /ask
 
-
-Sends both the message dataset and the user's question to Claude
-
-Returns a structured JSON answer
-
-API Endpoints
-POST /ask
-
-Request Body:
-
+**Request Body:**
+```json
 {
   "question": "When is Layla planning her trip to London?"
 }
+```
 
-
-Response:
-
+**Response:**
+```json
 {
   "answer": "Layla mentions planning her trip to London in June 2024."
 }
+```
 
+**Example Questions:**
+- "How many cars does Vikram Desai have?"
+- "What are Amira's favorite restaurants?"
+- "List all the members who have sent messages."
 
-Example Questions:
+## Setup & Deployment
 
-"How many cars does Vikram Desai have?"
+### Local Development
 
-"What are Amira's favorite restaurants?"
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-"List all the members who have sent messages."
+2. **Set your Anthropic API key:**
+   ```bash
+   export ANTHROPIC_API_KEY="your-api-key-here"
+   ```
 
-Setup & Deployment
-Local Development
+3. **Run the server:**
+   ```bash
+   uvicorn main:app --reload --port 8080
+   ```
 
-Install dependencies:
+4. **API will be available at:**
+   ```
+   http://localhost:8080
+   ```
 
-pip install -r requirements.txt
+### Docker Deployment
 
-
-Set your Anthropic API key:
-
-export ANTHROPIC_API_KEY="your-api-key-here"
-
-
-Run the server:
-
-uvicorn main:app --reload --port 8080
-
-
-API will be available at:
-
-http://localhost:8080
-
-Docker Deployment
-
-Build and run:
-
+**Build and run:**
+```bash
 docker build -t member-qa-system .
 docker run -p 8080:8080 -e ANTHROPIC_API_KEY="your-api-key" member-qa-system
+```
 
-Deploying on Railway (Used in this project)
+### Deploying on Railway (Used in this project)
 
-Create a Railway project
+1. Create a Railway project
+2. Select "Deploy from GitHub" and choose this repo
+3. Set environment variable: `ANTHROPIC_API_KEY=your-key`
+4. Railway builds and deploys automatically
+5. **Live URL:** `https://member-qa-system-production-8c5a.up.railway.app`
 
-Select "Deploy from GitHub" and choose this repo
-
-Set environment variable:
-
-ANTHROPIC_API_KEY=your-key
-
-
-Railway builds and deploys automatically
-
-Live URL:
-
-https://member-qa-system-production-8c5a.up.railway.app
-
-Deploy to Other Platforms
+### Deploy to Other Platforms
 
 The Dockerfile supports deployment to:
+- Google Cloud Run
+- AWS ECS / Fargate
+- Heroku (Container Registry)
+- Render
+- DigitalOcean App Platform
 
-Google Cloud Run
+## Testing
 
-AWS ECS / Fargate
-
-Heroku (Container Registry)
-
-Render
-
-DigitalOcean App Platform
-
-Testing
-Command Line
+### Command Line
+```bash
 curl -X POST http://localhost:8080/ask \
   -H "Content-Type: application/json" \
   -d '{"question": "When is Layla planning her trip to London?"}'
+```
 
-Python Test Suite
+### Python Test Suite
+```bash
 python test_api.py
+```
 
-Web Testing Interface
+### Web Testing Interface
 
-Open:
+Open `index.html` in your browser.
 
-index.html
+**Features:**
+- Example buttons
+- Real-time answers
+- Response time metrics
+- Error and debug panel
 
-
-Features:
-
-Example buttons
-
-Real-time answers
-
-Response time metrics
-
-Error and debug panel
-
-Architecture
+## Architecture
 
 The system follows a simple pipeline:
 
-Receive question
+1. Receive question
+2. Fetch all member messages
+3. Construct LLM prompt with:
+   - dataset
+   - user question
+4. Claude extracts relevant information
+5. Structured JSON answer returned
 
-Fetch all member messages
-
-Construct LLM prompt with:
-
-dataset
-
-user question
-
-Claude extracts relevant information
-
-Structured JSON answer returned
-
-⚠️ Known Limitation — Upstream /messages API Instability
+## ⚠️ Known Limitation — Upstream /messages API Instability
 
 The assignment API:
-
+```
 https://november7-730026606190.europe-west1.run.app/messages
+```
 
-
-returns:
-
-307 Temporary Redirect to /messages/
+returns `307 Temporary Redirect` to `/messages/`
 
 But the redirected endpoint frequently returns inconsistent HTTP errors:
+- 400 Bad Request
+- 401 Unauthorized
+- 402 Payment Required
+- 403 Forbidden
+- 405 Method Not Allowed
 
-400 Bad Request
+Because this is upstream behavior, the QA service handles it gracefully by returning a friendly `"answer": "Failed to fetch member data…"`, while staying compliant with the assignment.
 
-401 Unauthorized
+## Bonus 1: Alternative Approaches Considered
 
-402 Payment Required
-
-403 Forbidden
-
-405 Method Not Allowed
-
-Because this is upstream behavior, the QA service handles it gracefully by returning a friendly "answer": "Failed to fetch member data…", while staying compliant with the assignment.
-
-Bonus 1: Alternative Approaches Considered
-✔ 1. LLM-Based Approach (Chosen)
+### ✔ 1. LLM-Based Approach (Chosen)
 
 Uses Claude to extract answers from the dataset.
 
-Pros:
+**Pros:**
+- Flexible natural language understanding
+- Minimal engineering overhead
+- No schema or pattern writing
 
-Flexible natural language understanding
+**Cons:**
+- Reliant on API
+- Higher latency
 
-Minimal engineering overhead
+### 2. Traditional NLP + Pattern Matching
 
-No schema or pattern writing
+**Pros:**
+- Fast
+- Deterministic
 
-Cons:
+**Cons:**
+- Brittle
+- Requires heavy manual rule-writing
 
-Reliant on API
+### 3. Embedding-Based Semantic Search
 
-Higher latency
+**Pros:**
+- Good semantic matching
 
-2. Traditional NLP + Pattern Matching
+**Cons:**
+- Requires extra pipeline for extraction
 
-Pros:
+### 4. Fine-Tuned Model
 
-Fast
+**Pros:**
+- Fast, predictable
 
-Deterministic
+**Cons:**
+- Requires labeled dataset
 
-Cons:
+### 5. Text-to-SQL Pipeline
 
-Brittle
+**Pros:**
+- Efficient for structured questions
 
-Requires heavy manual rule-writing
+**Cons:**
+- Requires a SQL database + schema mapping
 
-3. Embedding-Based Semantic Search
+### Why LLM Approach Was Chosen
 
-Pros:
+- Handles varied question types
+- Works well for small datasets
+- No effort needed to maintain rules → faster development
+- Best option given the assignment constraints
 
-Good semantic matching
+## Bonus 2: Data Insights & Anomalies
 
-Cons:
+`analyze_data.py` performs structural and semantic checks on the dataset.
 
-Requires extra pipeline for extraction
+### Findings:
 
-4. Fine-Tuned Model
+**Redirect Errors**
+- `/messages` → 307 redirect
+- redirected endpoint unpredictably returns 400/401/402/403/405
 
-Pros:
+**Duplicate Messages**
+- Several message entries appear multiple times.
 
-Fast, predictable
+**Missing Fields**
+- Some entries lack author names, timestamps, or text.
 
-Cons:
+**Inconsistent Formats**
+- Dates appear in mixed formats (ISO vs informal).
 
-Requires labeled dataset
+**Edge-case Values**
+- Some fields contain null or empty strings unexpectedly.
 
-5. Text-to-SQL Pipeline
+A machine-generated report is saved at: `data_analysis_results.json`
 
-Pros:
+## Technologies Used
 
-Efficient for structured questions
-
-Cons:
-
-Requires a SQL database + schema mapping
-
-Why LLM Approach Was Chosen
-
-Handles varied question types
-
-Works well for small datasets
-
-No effort needed to maintain rules → faster development
-
-Best option given the assignment constraints
-
-Bonus 2: Data Insights & Anomalies
-
-analyze_data.py performs structural and semantic checks on the dataset.
-
-Findings:
-
-Redirect Errors
-
-/messages → 307 redirect
-
-redirected endpoint unpredictably returns 400/401/402/403/405
-
-Duplicate Messages
-Several message entries appear multiple times.
-
-Missing Fields
-Some entries lack author names, timestamps, or text.
-
-Inconsistent Formats
-Dates appear in mixed formats (ISO vs informal).
-
-Edge-case Values
-Some fields contain null or empty strings unexpectedly.
-
-A machine-generated report is saved at:
-
-data_analysis_results.json
-
-Technologies Used
-
-FastAPI — backend framework
-
-Claude (Anthropic API) — natural language reasoning
-
-httpx — async HTTP client
-
-Docker — containerization
-
-Python 3.11 — runtime
-
-Railway — production deployment
+- **FastAPI** — backend framework
+- **Claude (Anthropic API)** — natural language reasoning
+- **httpx** — async HTTP client
+- **Docker** — containerization
+- **Python 3.11** — runtime
+- **Railway** — production deployment
